@@ -1,6 +1,7 @@
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from transformers import TrainingArguments, Trainer
 from transformers import DataCollatorForSeq2Seq
+from transformers import EarlyStoppingCallback
 import torch
 from datasets import load_from_disk
 import os
@@ -21,22 +22,26 @@ class ModelTrainer:
 
         trainer_args = TrainingArguments(
             output_dir=self.config.root_dir, 
-            num_train_epochs=1, 
+            num_train_epochs=10, 
             warmup_steps=500,
             per_device_train_batch_size=1, 
             per_device_eval_batch_size=1,
             weight_decay=0.01, 
             logging_steps=10,
-            evaluation_strategy='steps', 
+            eval_strategy='steps', 
             eval_steps=500, save_steps=1e6,
-            gradient_accumulation_steps=16
+            metric_for_best_model="eval_loss",
+            greater_is_better=False,
+            load_best_model_at_end=True,
+            gradient_accumulation_steps=32
         ) 
         trainer = Trainer(model=model_pegasus, 
                           args=trainer_args,
                           tokenizer=tokenizer, 
                           data_collator=seq2seq_data_collator,
-                          train_dataset=dataset_samsum_pt["test"],
-                          eval_dataset=dataset_samsum_pt["validation"])
+                          train_dataset=dataset_samsum_pt["train"],
+                          eval_dataset=dataset_samsum_pt["validation"],
+                          callbacks=[EarlyStoppingCallback(early_stopping_patience=5)])
         trainer.train()
 
         ## Save model

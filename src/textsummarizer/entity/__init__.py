@@ -9,7 +9,7 @@ class DataIngestionConfig:
     unzip_dir: Path
 
 @dataclass
-class  DataTransformationConfig:
+class DataTransformationConfig:
     root_dir: Path
     data_path: Path
     tokenizer_name: Path
@@ -25,10 +25,13 @@ class ModelTrainerConfig:
     per_device_eval_batch_size: int 
     weight_decay: float
     logging_steps: int
-    evaluation_strategy: str 
+    eval_strategy: str 
     eval_steps: int
     save_steps: float
     gradient_accumulation_steps: int
+    greater_is_better: bool
+    load_best_model_at_end: bool
+    metric_for_best_model: str
 
 @dataclass(frozen=True)
 class ModelEvaluationConfig:
